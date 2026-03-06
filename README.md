@@ -189,13 +189,10 @@ pipeline {
 
     }
 }
-# This pipeline will:
+# This pipeline flow:
 
-Pull code from GitHub
-Build Java application
-Run tests
-Generate WAR artifact
-Upload artifact to AWS S3
+GitHub → Jenkins → Build → Test → WAR → Upload to S3 → Deploy to Tomcat (Ansible)
+
 
 # ⚙️ Step 7: Install Tomcat on Worker Nodes (Using Ansible)
 tomcat.yml
@@ -207,18 +204,7 @@ ansible-playbook tomcat.yml
 # 🚀 Step 8: Deployment Playbook
 vi deploy.yml
 
----
-- name: Deploy WAR to Tomcat Servers
-  hosts: all
-
-  tasks:
-
-    - name: Copy WAR file
-      copy:
-        src: /var/lib/jenkins/workspace/project/target/myapp.war
-        dest: /root/tomcat/webapps/
-
-
+provided in this repo ("deploy.yml")
 
 
 # 🌐 Application Access
