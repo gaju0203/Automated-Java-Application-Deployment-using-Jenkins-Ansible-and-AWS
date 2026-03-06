@@ -125,15 +125,20 @@ Access Key : XXXXX
 Secret Key : XXXXX
 Region : ap-south-1
 
-# 🧱 Step 6: Jenkins Pipeline (Build & Upload Artifact)
+# 🧱 Step 6: Jenkins Pipeline Deployment with Ansible (upload artifact to s3)
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'server', choices: ['dev','test','prod'], description: 'Select Environment')
+        choice(name: 'branch', choices: ['main','master'], description: 'Git Branch')
+    }
+
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git 'https://https://github.com/gaju0203/Automated-Java-Application-Deployment-using-Jenkins-Ansible-and-AWS.git'
+                git branch: "${branch}", url: 'https://github.com/ReyazShaik/java-project-maven-new.git'
             }
         }
 
@@ -149,26 +154,41 @@ pipeline {
             }
         }
 
-        stage('Package') {
+        stage('Package Artifact') {
             steps {
                 sh 'mvn package'
             }
         }
 
-        stage('Upload to S3') {
+        stage('Upload Artifact to S3') {
             steps {
-                s3Upload entries: [[
-                bucket: 'jenkins-artifacts-demo',
-                sourceFile: '**/*.war',
-                selectedRegion: 'ap-south-1'
-                ]],
-                profileName: 's3creds'
+                s3Upload(
+                    profileName: 's3creds',
+                    entries: [[
+                        bucket: 'jenkins-artifacts-demo',
+                        selectedRegion: 'ap-south-1',
+                        sourceFile: '**/*.war',
+                        flatten: false
+                    ]]
+                )
+            }
+        }
+
+        stage('Deploy to Tomcat via Ansible') {
+            steps {
+                ansiblePlaybook(
+                    credentialsId: 'linuxcreds',
+                    disableHostKeyChecking: true,
+                    installation: 'ansible',
+                    inventory: '/etc/ansible/hosts',
+                    limit: "${server}",
+                    playbook: '/etc/ansible/deploy.yml'
+                )
             }
         }
 
     }
 }
-
 # This pipeline will:
 
 Pull code from GitHub
@@ -198,18 +218,8 @@ vi deploy.yml
         src: /var/lib/jenkins/workspace/project/target/myapp.war
         dest: /root/tomcat/webapps/
 
-# 🔄 Step 9: Jenkins Pipeline Deployment with Ansible
-Add Ansible stage in pipeline.
 
-stage('Deploy using Ansible') {
-    steps {
-        ansiblePlaybook credentialsId: 'linuxcreds',
-        disableHostKeyChecking: true,
-        installation: 'ansible',
-        inventory: '/etc/ansible/hosts',
-        playbook: '/etc/ansible/deploy.yml'
-    }
-}
+
 
 # 🌐 Application Access
 http://65.0.17..39:8080/myapp
