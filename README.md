@@ -52,7 +52,7 @@ Tomcat1 Tomcat2 Tomcat3
 -Java Web Application
 
 # 📂 Step 1: Source Code Repository
-https://github.com/ReyazShaik/java-project-maven-new.git
+https://github.com/gaju0203/Automated-Java-Application-Deployment-using-Jenkins-Ansible-and-AWS.git
 
 # 🔐 Step 2: Enable Root Login & SSH Configuration
 Set root password:
@@ -133,7 +133,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/ReyazShaik/java-project-maven-new.git'
+                git 'https://https://github.com/gaju0203/Automated-Java-Application-Deployment-using-Jenkins-Ansible-and-AWS.git'
             }
         }
 
@@ -178,30 +178,9 @@ Generate WAR artifact
 Upload artifact to AWS S3
 
 # ⚙️ Step 7: Install Tomcat on Worker Nodes (Using Ansible)
-vi tomcat.yml
----
----
-- name: Install Tomcat
-  hosts: all
-  become: yes
+tomcat.yml
 
-  tasks:
-
-    - name: Install Java
-      yum:
-        name: java-17-amazon-corretto
-        state: present
-
-    - name: Download Tomcat
-      get_url:
-        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.35/bin/apache-tomcat-10.1.35.tar.gz
-        dest: /root/
-
-    - name: Extract Tomcat
-      command: tar -zxvf apache-tomcat-10.1.35.tar.gz
-
-    - name: Rename Tomcat
-      command: mv apache-tomcat-10.1.35 tomcat
+provided in this repo ("tomcat.yml")
 
 ansible-playbook tomcat.yml
 
